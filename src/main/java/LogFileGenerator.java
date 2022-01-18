@@ -1,3 +1,7 @@
+import org.apache.spark.SparkConf;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.SparkSession;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -23,17 +27,19 @@ public class LogFileGenerator {
     }
 
     public void generateLog(){
+        SparkConf conf = new SparkConf().setMaster("yarn").setAppName("SparkParser");
+        SparkSession spark = SparkSession.builder()
+                .config(conf)
+                .getOrCreate();
+
+
         long startTime = System.currentTimeMillis();
-        List<String> dictionary = new ArrayList<>();
         Path output = Paths.get(outputPath);
         long count = 0;
 
-        try {
-            dictionary = Files.readAllLines(Paths.get(dictionaryPath));
-            System.out.println("Load dictionary " + dictionaryPath + " size: " + dictionary.size());
-        }catch (IOException io){
-            System.out.println("Wrong set dictionary path " + io.getMessage());
-        }
+        Dataset<String> dictionaryDS = spark.read().textFile(dictionaryPath);
+        System.out.println("Load dictionary " + dictionaryPath + " size: " + dictionaryDS.count());
+        dictionaryDS.show();
 
         try {
             Files.deleteIfExists(output);
