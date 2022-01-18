@@ -8,7 +8,7 @@ public class Main {
         int messageWordCount = 10;
         String rootPath = Paths.get("").toAbsolutePath().toString();
         String dictionaryPath = Paths.get(rootPath, "dictionary").toString();
-        String outputPath = Paths.get(rootPath, "output").toString();
+        String outputPath = Paths.get(rootPath, "mobile_log").toString();
 
         if(args.length==0){
             System.out.println("first argument (Amount string in output logfile) expected, value is set default = 100");
