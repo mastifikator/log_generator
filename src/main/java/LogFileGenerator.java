@@ -31,27 +31,38 @@ public class LogFileGenerator {
         long startTime = System.currentTimeMillis();
 
         Dataset<String> dictionaryDS = spark.read().textFile(dictionaryPath);
-        System.out.println("Load dictionary " + dictionaryPath + " size: " + dictionaryDS.count());
         List<String> dictionary = dictionaryDS.collectAsList();
 
+        long dictionaryTime = System.currentTimeMillis();
+        System.out.println("Load dictionary " + dictionaryPath + " size " + dictionaryDS.count());
+        System.out.println("Time elapsed: " + (dictionaryTime - startTime));
+
+
         List<String> transitList = new ArrayList<>();
+        long count = 0;
 
         for (int i = 0; i < stringAmount; i++) {
             if (i % 2 == 0) {
                 String call = CallGenerator.generate(telephoneRandomCount) + "\n";
                 transitList.add(call);
+                count++;
             } else {
                 String message = MessageGenerator.generate(telephoneRandomCount, messageWordCount, dictionary) + "\n";
                 transitList.add(message);
+                count++;
             }
         }
+
+        long generateTime = System.currentTimeMillis();
+        System.out.println("Generated " + count + " string");
+        System.out.println("Time elapsed: " + (generateTime - startTime));
+
 
         Dataset<String> outputDS = spark.createDataset(transitList, Encoders.STRING());
         outputDS.write().mode(SaveMode.Overwrite).text(outputURI);
 
         long finishTime = System.currentTimeMillis();
-        long elapsed = finishTime - startTime;
-        System.out.println("Elapsed time: " + elapsed);
+        System.out.println("Elapsed time: " + (finishTime - startTime));
         System.out.println("Created " + outputDS.count() + " string logs");
     }
 }
